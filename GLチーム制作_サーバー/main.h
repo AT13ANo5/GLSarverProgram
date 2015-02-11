@@ -116,6 +116,11 @@ typedef struct {
 
 static const int SERV_ID = 256;
 
+void aiSetPos(int _charNum,VECTOR3 _pos);
+void aiSetRot(int _charNum,VECTOR3 _rot);
+void aiSetCannonRot(int _charNum,VECTOR3 _cannonRot);
+void aiSetCannon(int _charNum,bool _flag);
+
 #endif
 
 //	EOF

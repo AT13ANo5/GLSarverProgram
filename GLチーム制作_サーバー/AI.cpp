@@ -164,8 +164,6 @@ void AI::Finalize(void)
 void AI::UpdateAll(void)
 {
 	AI* ai = Top;
-	
-	//全部の情報を受取る
 
 	while (ai)
 	{
@@ -173,7 +171,22 @@ void AI::UpdateAll(void)
 		ai = ai->Next;
 	}
 
+	ai = Top;
+
 	//全部の情報を送る
+	while (ai)
+	{
+		if (!ai->UserInfo.entryFlag)
+		{
+			aiSetPos(ai->ID,ai->UserInfo.pos);
+			aiSetRot(ai->ID,ai->UserInfo.rot);
+			aiSetCannonRot(ai->ID,ai->UserInfo.cannonRot);
+			aiSetCannon(ai->ID,ai->UserInfo.cannon);
+		}
+		ai = ai->Next;
+	}
+
+	
 }
 //------------------------------------------------------------------------------
 //更新
@@ -314,6 +327,5 @@ void AI::MazzleRevision(void)
 	}
 	REVISE_PI(BarrelRotX);
 	REVISE_PI(DestRotY);
-
-	//BallelRotXを送る
+	UserInfo.cannonRot = VECTOR3(BarrelRotX,0,0);
 }
