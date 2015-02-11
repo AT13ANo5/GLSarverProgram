@@ -114,6 +114,15 @@ typedef struct {
 } USER_INFO;
 //----------------------------------------------------------------
 
+// 岩情報
+//----------------------------------------------------------------
+typedef struct {
+	VECTOR3	position;
+	VECTOR3	rotation;
+	VECTOR3	scaling;
+} ROCK_DATA;
+//----------------------------------------------------------------
+
 static const int SERV_ID = 256;
 
 void aiSetPos(int _charNum,VECTOR3 _pos);
@@ -122,6 +131,17 @@ void aiSetCannonRot(int _charNum,VECTOR3 _cannonRot);
 void aiSetCannon(int _charNum,bool _flag);
 
 VECTOR3 GetRockPos(int index);
+
+//----------------------------------------------------------------
+// 当たり判定
+//----------------------------------------------------------------
+void PushBackCharacter(void);					// キャラクター同士の押し戻し
+void PushBackRock(void);						// キャラクターと岩の押し戻し
+void PushBackField(void);						// 地形の押し戻し
+void PushBackObjectByField(VECTOR3* pPosition);	// オブジェクトの地形による押し戻し
+void PushBackBattleArea(void);					// 行動可能範囲の押し戻し
+bool NeedsSkipPlayer(int index);				// プレイヤー判定スキップ
+bool NeedsSkipBullet(int index);				// 砲弾判定スキップ
 
 #endif
 

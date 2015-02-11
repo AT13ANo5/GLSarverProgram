@@ -13,10 +13,13 @@
 //	インクルード
 //*****************************************************************************
 #include <ws2tcpip.h>
+#include <float.h>
+#include <math.h>
 #include <time.h>
 #include<process.h>
 #include "main.h"
 #include "AI.h"
+#include "MeshGround.h"
 
 //*****************************************************************************
 //	ライブラリのリンク
@@ -40,29 +43,44 @@ SOCKET sendSock;
 sockaddr_in sendAdd;
 bool gameStartFlag;
 
-const VECTOR3 ROCK_POSITION_LIST[] = {
-	VECTOR3(-214.0f,100.0f,421.0f),
-	VECTOR3(359.0f,100.0f,188.0f),
-	VECTOR3(94.0f,100.0f,-458.0f),
-	VECTOR3(-198.0f,100.0f,222.0f),
-	VECTOR3(419.0f,100.0f,293.0f),
-	VECTOR3(-335.0f,100.0f,164.0f),
-	VECTOR3(-471.0f,100.0f,-115.0f),
-	VECTOR3(368.0f,100.0f,-363.0f),
-	VECTOR3(-476.0f,100.0f,231.0f),
-	VECTOR3(-249.0f,100.0f,-319.0f),
-	VECTOR3(-243.0f,100.0f,481.0f),
-	VECTOR3(345.0f,100.0f,-253.0f),
-	VECTOR3(444.0f,100.0f,-118.0f),
-	VECTOR3(186.0f,100.0f,27.0f),
-	VECTOR3(387.0f,100.0f,-438.0f),
-	VECTOR3(-12.0f,100.0f,-439.0f),
-	VECTOR3(496.0f,100.0f,-332.0f),
-	VECTOR3(-247.0f,100.0f,143.0f),
-	VECTOR3(-302.0f,100.0f,-296.0f),
-	VECTOR3(-171.0f,100.0f,-274.0f),
+const float	RADIUS_DEFENSE_CHARACTER = 10.0f;	// キャラクターの防御半径
+const float	HEIGHT_DEFENSE_CHARACTER = 10.0f;	// キャラクターの防御中心高さ
+const float	RADIUS_OFFENSE_BULLET = 10.0f;		// 砲弾の攻撃半径
+const float	HEIGHT_OFFENSE_BULLET = 10.0f;		// 砲弾の攻撃中心高さ
+const float	RADIUS_PUSH_CHARACTER = 10.0f;		// キャラクターの押し戻し半径
+const float	HEIGHT_PUSH_CHARACTER = 10.0f;		// キャラクターの押し戻し中心高さ
+const float	RADIUS_DEFENSE_ROCK = 45.0f;		// 岩の防御半径
+const float	HEIGHT_DEFENSE_ROCK = 45.0f;		// 岩の防御中心高さ
+const float	RADIUS_PUSH_ROCK = 45.0f;			// 岩の押し戻し半径
+const float	HEIGHT_PUSH_ROCK = 45.0f;			// 岩の押し戻し中心高さ
+const float	FIELD_PANEL_SIZE = 35.0f;			//フィールドのパネル一枚のサイズ
+const float	RADIUS_AREA_BATTLE = 1000.0f;		// 戦闘エリア半径
 
+const ROCK_DATA ROCK_DATA_LIST[] = {
+	{ VECTOR3(-214.0f,100.0f,421.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(359.0f,100.0f,188.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(94.0f,100.0f,-458.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-198.0f,100.0f,222.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(419.0f,100.0f,293.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-335.0f,100.0f,164.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-471.0f,100.0f,-115.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(368.0f,100.0f,-363.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-476.0f,100.0f,231.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-249.0f,100.0f,-319.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-243.0f,100.0f,481.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(345.0f,100.0f,-253.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(444.0f,100.0f,-118.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(186.0f,100.0f,27.0f),		VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(387.0f,100.0f,-438.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-12.0f,100.0f,-439.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(496.0f,100.0f,-332.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-247.0f,100.0f,143.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-302.0f,100.0f,-296.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) },
+	{ VECTOR3(-171.0f,100.0f,-274.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) }
 };
+
+CMeshGround*	Ground;		// フィールド
+
 //=============================================================================
 //	自作バインド関数
 //=============================================================================
@@ -274,6 +292,9 @@ int main(void)
 #endif
 	NET_DATA data;
 
+	// 地形生成
+	Ground = CMeshGround::Create(VECTOR3(0.0f, 0.0f, 0.0f), VECTOR2(FIELD_PANEL_SIZE, FIELD_PANEL_SIZE), VECTOR2(0, 0), 1.5f);
+
 	for (;;)
 	{
 		//	受信
@@ -457,6 +478,9 @@ int main(void)
 		}
 	}
 
+	// 地形の破棄
+	SafeDelete(Ground);
+
 	CloseHandle(ai);
 	// ソケット終了
 	closesocket(recvSock);
@@ -514,10 +538,231 @@ VECTOR3 GetRockPos(int index)
 {
 	if (index >= 0 && index < 20)
 	{
-		return ROCK_POSITION_LIST[index];
+		return ROCK_DATA_LIST[index].position;
 	}
 
 	return VECTOR3(-1.0f,-1.0f,-1.0f);
+}
+
+//==============================================================================
+// キャラクター同士の押し戻し
+//==============================================================================
+void PushBackCharacter(void)
+{
+	// 攻撃側の決定
+	USER_INFO	infoOffense;		// 攻撃側プレイヤー
+	for (int cntOffense = 0; cntOffense < charcterMax; ++cntOffense)
+	{
+		// プレイヤーを取得
+		infoOffense = userInfo[cntOffense];
+
+		// プレイヤーが判定可能か確認
+		if (NeedsSkipPlayer(cntOffense))
+		{
+			continue;
+		}
+
+		// 防御側の決定
+		for (int cntDefense = 0; cntDefense < charcterMax; ++cntDefense)
+		{
+			// プレイヤーを取得
+			USER_INFO	infoDefense = userInfo[cntDefense];		// 防御側プレイヤー
+
+			// プレイヤーが判定可能か確認
+			if (NeedsSkipPlayer(cntDefense))
+			{
+				continue;
+			}
+			if (cntOffense == cntDefense)
+			{
+				continue;
+			}
+
+			// 当たり判定
+			VECTOR3	positionOffense = infoOffense.pos;		// 攻撃判定中心座標
+			VECTOR3	positionDefense = infoDefense.pos;		// 防御判定中心座標
+			VECTOR3	vectorOffenseToDefense;					// 攻撃判定から防御判定へのベクトル
+			float	distanceOffenseAndDefense;				// 判定の中心同士の距離
+			positionOffense.y += HEIGHT_PUSH_CHARACTER;
+			positionDefense.y += HEIGHT_PUSH_CHARACTER;
+			vectorOffenseToDefense = positionDefense - positionOffense;
+			distanceOffenseAndDefense = sqrtf(vectorOffenseToDefense.x * vectorOffenseToDefense.x + vectorOffenseToDefense.y * vectorOffenseToDefense.y + vectorOffenseToDefense.z * vectorOffenseToDefense.z);
+			if (distanceOffenseAndDefense < 2.0f * RADIUS_PUSH_CHARACTER)
+			{
+				// 押し戻し
+				if (distanceOffenseAndDefense < -FLT_EPSILON || distanceOffenseAndDefense > FLT_EPSILON)
+				{
+					VECTOR3	vectorPushBack = vectorOffenseToDefense * 0.51f * (2.0f * RADIUS_PUSH_CHARACTER - distanceOffenseAndDefense) / distanceOffenseAndDefense;
+					infoDefense.pos += vectorPushBack;
+					vectorPushBack *= -1.0f;
+					infoOffense.pos += vectorPushBack;
+				}
+				else
+				{
+					infoOffense.pos.x += RADIUS_PUSH_CHARACTER;
+					infoDefense.pos.x -= RADIUS_PUSH_CHARACTER;
+				}
+
+				// エフェクト：火花　プレイヤー同士のぶつかり
+			}
+		}
+	}
+}
+
+//==============================================================================
+// キャラクターと岩の押し戻し
+//==============================================================================
+void PushBackRock(void)
+{
+	// 攻撃側の決定
+	USER_INFO	infoPlayer;		// 攻撃側プレイヤー
+	for (int cntPlayer = 0; cntPlayer < charcterMax; ++cntPlayer)
+	{
+		// プレイヤーを取得
+		infoPlayer = userInfo[cntPlayer];
+
+		// プレイヤーが判定可能か確認
+		if (NeedsSkipPlayer(cntPlayer))
+		{
+			continue;
+		}
+
+		// 防御側の決定
+		VECTOR3	positioninfoPlayer = infoPlayer.pos;						// 攻撃判定中心座標
+		int		maxRockData = sizeof(ROCK_DATA_LIST) / sizeof(ROCK_DATA);	// 最大岩数
+		for (int cntRock = 0; cntRock < maxRockData; ++cntRock)
+		{
+			// 当たり判定
+			VECTOR3	positionRock = ROCK_DATA_LIST[cntRock].position;	// 防御判定中心座標
+			VECTOR3	vectorOffenseToDefense;								// 攻撃判定から防御判定へのベクトル
+			float	distanceOffenseAndDefense;							// 判定の中心同士の距離
+			float	scalingRock;										// 岩の大きさ
+			scalingRock = (ROCK_DATA_LIST[cntRock].scaling.x < ROCK_DATA_LIST[cntRock].scaling.z ? ROCK_DATA_LIST[cntRock].scaling.x : ROCK_DATA_LIST[cntRock].scaling.z);
+			positioninfoPlayer.y += HEIGHT_PUSH_CHARACTER;
+			positionRock.y += HEIGHT_PUSH_ROCK;
+			vectorOffenseToDefense = positionRock - positioninfoPlayer;
+			distanceOffenseAndDefense = sqrtf(vectorOffenseToDefense.x * vectorOffenseToDefense.x + vectorOffenseToDefense.y * vectorOffenseToDefense.y + vectorOffenseToDefense.z * vectorOffenseToDefense.z);
+
+			if (distanceOffenseAndDefense < RADIUS_PUSH_CHARACTER + RADIUS_PUSH_ROCK * scalingRock)
+			{
+				// 押し戻し
+				if (distanceOffenseAndDefense < -FLT_EPSILON || distanceOffenseAndDefense > FLT_EPSILON)
+				{
+					VECTOR3	vectorPushBack = vectorOffenseToDefense * -(RADIUS_PUSH_CHARACTER + RADIUS_PUSH_ROCK * scalingRock - distanceOffenseAndDefense) / distanceOffenseAndDefense;
+					vectorPushBack.y = 0.0f;
+					infoPlayer.pos += vectorPushBack;
+				}
+				else
+				{
+					infoPlayer.pos.x += RADIUS_PUSH_CHARACTER + RADIUS_PUSH_ROCK * scalingRock;
+				}
+			}
+		}
+	}
+}
+
+//==============================================================================
+// 地形の押し戻し
+//==============================================================================
+void PushBackField(void)
+{
+	// 判定
+	USER_INFO	infoPlayer;		// 対象オブジェクト
+	for (int cntPlayer = 0; cntPlayer < charcterMax; ++cntPlayer)
+	{
+		// 対象オブジェクトを取得
+		infoPlayer = userInfo[cntPlayer];
+
+		// 対象のステートを確認
+		if (NeedsSkipPlayer(cntPlayer))
+		{
+			continue;
+		}
+
+		// 押し戻し
+		PushBackObjectByField(&userInfo[cntPlayer].pos);
+	}
+}
+
+//==============================================================================
+// オブジェクトの地形による押し戻し
+//==============================================================================
+void PushBackObjectByField(VECTOR3* pPosition)
+{
+	// 地形とのあたり判定
+	VECTOR3	NormalGround;		// 地形の法線
+	float	HeightGround;		// 地形の高さ
+	pPosition->y = Ground->GetHeight(*pPosition, &NormalGround);
+}
+
+//==============================================================================
+// 戦闘範囲押し戻し
+//==============================================================================
+void PushBackBattleArea(void)
+{
+	// 判定
+	USER_INFO	infoPlayer;		// 対象オブジェクト
+	for (int cntPlayer = 0; cntPlayer < charcterMax; ++cntPlayer)
+	{
+		// 対象オブジェクトを取得
+		infoPlayer = userInfo[cntPlayer];
+
+		// 対象のステートを確認
+		if (NeedsSkipPlayer(cntPlayer))
+		{
+			continue;
+		}
+
+		// 押し戻し
+		VECTOR3	vectoruserInfoToCenter = Ground->Pos() - infoPlayer.pos;
+		vectoruserInfoToCenter.y = 0.0f;
+		float	distanceFromCenter = vectoruserInfoToCenter.x * vectoruserInfoToCenter.x + vectoruserInfoToCenter.y * vectoruserInfoToCenter.y + vectoruserInfoToCenter.z * vectoruserInfoToCenter.z;
+		if (distanceFromCenter > RADIUS_AREA_BATTLE * RADIUS_AREA_BATTLE)
+		{
+			float	distancePushBack = sqrtf(distanceFromCenter) - RADIUS_AREA_BATTLE;
+			vectoruserInfoToCenter.Normalize();
+			infoPlayer.pos += vectoruserInfoToCenter * distancePushBack;
+		}
+	}
+}
+
+//==============================================================================
+// プレイヤー判定スキップ
+//==============================================================================
+bool NeedsSkipPlayer(int index)
+{
+	// エラーチェック
+	if (index < 0 || index >= charcterMax)
+	{
+		return true;
+	}
+
+	// ステートを確認
+#if 0
+	int		stateuserInfo = userInfo->State();
+	if (stateuserInfo == PLAYER_STATE_DEATH || stateuserInfo == PLAYER_STATE_RESPAWN)
+	{
+		return true;
+	}
+#endif
+	// スキップしない
+	return false;
+}
+
+//==============================================================================
+// 砲弾判定スキップ
+//==============================================================================
+bool NeedsSkipBullet(int index)
+{
+#if 0
+	// エラーチェック
+	if (index < 0 || index >= charcterMax)
+	{
+		return true;
+	}
+#endif
+	// スキップしない
+	return false;
 }
 
 //	EOF
