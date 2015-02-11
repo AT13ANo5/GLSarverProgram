@@ -36,6 +36,8 @@ const int charcterMax = 6;
 const int hostNameMax = 256;
 const int sendPort = 20000;
 USER_INFO userInfo[charcterMax];
+SOCKET sendSock;
+sockaddr_in sendAdd;
 
 //=============================================================================
 //	自作バインド関数
@@ -83,6 +85,94 @@ void initUserInfo()
 }
 
 //=============================================================================
+//	ai用位置セット＆送信処理
+//=============================================================================
+void aiSetPos(int _charNum, VECTOR3 _pos)
+{
+	NET_DATA data;
+
+	//	位置情報のセット
+	userInfo[_charNum].pos.x = _pos.x;
+	userInfo[_charNum].pos.y = _pos.y;
+	userInfo[_charNum].pos.z = _pos.z;
+
+	data.charNum = _charNum;
+	data.type = DATA_TYPE_POS;
+	data.servID = SERV_ID;
+	data.data_pos.posX = _pos.x;
+	data.data_pos.posY = _pos.y;
+	data.data_pos.posZ = _pos.z;
+
+	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+}
+
+//=============================================================================
+//	ai用位置セット＆送信処理
+//=============================================================================
+void aiSetRot(int _charNum, VECTOR3 _rot)
+{
+	NET_DATA data;
+
+	//	位置情報のセット
+	userInfo[_charNum].rot.x = _rot.x;
+	userInfo[_charNum].rot.y = _rot.y;
+	userInfo[_charNum].rot.z = _rot.z;
+
+	data.charNum = _charNum;
+	data.type = DATA_TYPE_ROT;
+	data.servID = SERV_ID;
+	data.data_rot.rotX = _rot.x;
+	data.data_rot.rotY = _rot.y;
+	data.data_rot.rotZ = _rot.z;
+
+	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+}
+
+//=============================================================================
+//	ai用位置セット＆送信処理
+//=============================================================================
+void aiSetCannonRot(int _charNum, VECTOR3 _cannonRot)
+{
+	NET_DATA data;
+
+	//	位置情報のセット
+	userInfo[_charNum].cannonRot.x = _cannonRot.x;
+	userInfo[_charNum].cannonRot.y = _cannonRot.y;
+	userInfo[_charNum].cannonRot.z = _cannonRot.z;
+
+	data.charNum = _charNum;
+	data.type = DATA_TYPE_CANNONROT;
+	data.servID = SERV_ID;
+	data.data_cannonRot.rotX = _cannonRot.x;
+	data.data_cannonRot.rotY = _cannonRot.y;
+	data.data_cannonRot.rotZ = _cannonRot.z;
+
+	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+}
+
+//=============================================================================
+//	ai用位置セット＆送信処理
+//=============================================================================
+void aiSetCannon(int _charNum, bool _flag)
+{
+	NET_DATA data;
+
+	//	位置情報のセット
+	userInfo[_charNum].cannon = _flag;
+
+	data.charNum = _charNum;
+	data.type = DATA_TYPE_CANNON;
+	data.servID = SERV_ID;
+	data.data_cannon.flag = _flag;
+
+	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+}
+
+//=============================================================================
 //	メイン処理関数
 //=============================================================================
 int main(void)
@@ -118,11 +208,9 @@ int main(void)
 	//	送信時用変数群生成
 	//-------------------------------------------------
 	//	ソケットの生成
-	SOCKET sendSock;
 	sendSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	//	送信先アドレス
-	sockaddr_in sendAdd;
 	sendAdd.sin_port = htons(2000);
 	sendAdd.sin_family = AF_INET;
 	sendAdd.sin_addr.s_addr = inet_addr("239.0.0.23");//マルチキャストアドレス
