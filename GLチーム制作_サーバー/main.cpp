@@ -361,14 +361,20 @@ int main(void)
 				case DATA_TYPE_KILL:
 
 					//	殺した数インクリメント
-					userInfo[data.charNum].kill++;
+					userInfo[data.charNum].kill = data.data_killDeath.value;
+
+					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 
 					break;
 
 				case DATA_TYPE_DEATH:
 
 					//	殺された数インクリメント
-					userInfo[data.charNum].death++;
+					userInfo[data.charNum].death = data.data_killDeath.value;
+
+					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 
 					break;
 
@@ -412,6 +418,18 @@ int main(void)
 					break;
 
 				case DATA_TYPE_CHANGE_GAME:
+
+					//	最上位クライアントから、ゲームへの遷移を受け取ったら
+					if (data.charNum == 0)
+					{
+						//	他のクライアントにもゲームへの遷移を伝える
+						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+					}
+
+					break;
+
+				case DATA_TYPE_CHANGE_RESULT:
 
 					//	最上位クライアントから、ゲームへの遷移を受け取ったら
 					if (data.charNum == 0)
