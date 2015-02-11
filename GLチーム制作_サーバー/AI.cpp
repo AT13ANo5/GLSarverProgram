@@ -253,6 +253,7 @@ void AI::SurchTarget(void)
 	{
 		if (ai->ID == ID)
 		{
+			ai = ai->Next;
 			continue;
 		}
 		Sub.x = ai->UserInfo.pos.x - UserInfo.pos.x;
@@ -260,6 +261,7 @@ void AI::SurchTarget(void)
 		disBuff = (Sub.x*Sub.x+Sub.y*Sub.y);
 		if (disBuff > SURCH_MAX)
 		{
+			ai = ai->Next;
 			continue;
 		}
 		if (disBuff < distance)
