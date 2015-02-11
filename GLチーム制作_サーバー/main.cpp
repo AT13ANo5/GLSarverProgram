@@ -39,6 +39,29 @@ USER_INFO userInfo[charcterMax];
 SOCKET sendSock;
 sockaddr_in sendAdd;
 
+const VECTOR3 ROCK_POSITION_LIST[] = {
+	VECTOR3(-214.0f,100.0f,421.0f),
+	VECTOR3(359.0f,100.0f,188.0f),
+	VECTOR3(94.0f,100.0f,-458.0f),
+	VECTOR3(-198.0f,100.0f,222.0f),
+	VECTOR3(419.0f,100.0f,293.0f),
+	VECTOR3(-335.0f,100.0f,164.0f),
+	VECTOR3(-471.0f,100.0f,-115.0f),
+	VECTOR3(368.0f,100.0f,-363.0f),
+	VECTOR3(-476.0f,100.0f,231.0f),
+	VECTOR3(-249.0f,100.0f,-319.0f),
+	VECTOR3(-243.0f,100.0f,481.0f),
+	VECTOR3(345.0f,100.0f,-253.0f),
+	VECTOR3(444.0f,100.0f,-118.0f),
+	VECTOR3(186.0f,100.0f,27.0f),
+	VECTOR3(387.0f,100.0f,-438.0f),
+	VECTOR3(-12.0f,100.0f,-439.0f),
+	VECTOR3(496.0f,100.0f,-332.0f),
+	VECTOR3(-247.0f,100.0f,143.0f),
+	VECTOR3(-302.0f,100.0f,-296.0f),
+	VECTOR3(-171.0f,100.0f,-274.0f),
+
+};
 //=============================================================================
 //	©ìƒoƒCƒ“ƒhŠÖ”
 //=============================================================================
@@ -475,6 +498,16 @@ unsigned __stdcall aiUpdate(void *p)
 			PrevTime = CurrentTime;
 		}
 	}
+}
+
+VECTOR3 GetRockPos(int index)
+{
+	if (index >= 0 && index < 20)
+	{
+		return ROCK_POSITION_LIST[index];
+	}
+
+	return VECTOR3(-1.0f,-1.0f,-1.0f);
 }
 
 //	EOF

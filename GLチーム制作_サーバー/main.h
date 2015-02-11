@@ -121,6 +121,8 @@ void aiSetRot(int _charNum,VECTOR3 _rot);
 void aiSetCannonRot(int _charNum,VECTOR3 _cannonRot);
 void aiSetCannon(int _charNum,bool _flag);
 
+VECTOR3 GetRockPos(int index);
+
 #endif
 
 //	EOF
