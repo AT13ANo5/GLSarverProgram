@@ -16,6 +16,12 @@
     <Filter Include="AI">
       <UniqueIdentifier>{34aa127a-be1a-473f-9e3e-8bd23e52bc92}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MeshGround">
+      <UniqueIdentifier>{091acb92-a891-42c4-a7e5-d1f0659fe534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{247cb482-75ec-4d2d-be04-afcc8cba7526}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -27,6 +33,12 @@
     <ClCompile Include="AI.cpp">
       <Filter>AI</Filter>
     </ClCompile>
+    <ClCompile Include="MeshGround.cpp">
+      <Filter>MeshGround</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -37,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="AI.h">
       <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshGround.h">
+      <Filter>MeshGround</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

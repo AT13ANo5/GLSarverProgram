@@ -5,6 +5,7 @@
 //インクルード
 //------------------------------------------------------------------------------
 #include "AI.h"
+#include "MeshGround.h"
 #include<float.h>
 #include <math.h>
 
@@ -34,11 +35,13 @@ const float GRAVITY = -0.08f;				//弾にかかる重力加速度
 const float BULLET_SPEED = 10.0f;			//弾の速度
 const float TURN_SPEED = DEG2RAD(3.0f);		//回転速度
 const int PLAYER_RELOAD_TIME (300);			// リロードまでのフレーム
+const float FIELD_PANEL_SIZE = 35.0f;			//フィールドのパネル一枚のサイズ
 //------------------------------------------------------------------------------
 //静的メンバ変数定義
 //------------------------------------------------------------------------------
 AI* AI::Top = nullptr;
 AI* AI::Cur = nullptr;
+CMeshGround* AI::Field = nullptr;
 
 float leap(float start,float end,float delta)
 {
@@ -138,6 +141,7 @@ AI::~AI()
 //------------------------------------------------------------------------------
 void AI::Initialize(void)
 {
+	Field = CMeshGround::Create(VECTOR3(0.0f,0.0f,0.0f),VECTOR2(FIELD_PANEL_SIZE,FIELD_PANEL_SIZE),VECTOR2(0,0),1.5f);
 	for (int cnt = 0;cnt < UserMax;cnt++)
 	{
 		AI* ai = new AI;
@@ -149,6 +153,8 @@ void AI::Initialize(void)
 //------------------------------------------------------------------------------
 void AI::Finalize(void)
 {
+	Field->Uninit();
+	Field = nullptr;
 	AI* ai = Top;
 	AI* next = nullptr;
 	while (ai)
