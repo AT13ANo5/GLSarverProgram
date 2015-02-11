@@ -269,6 +269,7 @@ void AI::SurchTarget(void)
 			TargetPos = ai->UserInfo.pos;
 			TargetSpeed = ai->Movement;
 		}
+		ai = ai->Next;
 	}
 	TargetId = target;
 }
