@@ -116,10 +116,11 @@ AI::AI()
 	UserInfo.entryFlag = false;
 	UserInfo.death = 0;
 	UserInfo.kill = 0;
-	UserInfo.pos = VECTOR3(0,0,0);
+	UserInfo.pos = VECTOR3(rand() % 2000 - 1000.0f,0,rand() % 2000 - 1000.0f);
 	UserInfo.rot = VECTOR3(0,0,0);
 	TargetPos = VECTOR3(0,0,0);
 	TargetId = -1;
+	Speed = PLAYER_MOVE_SPEED;
 	DestRotY = 0;
 	frame = 0;
 	_ReloadTimer = 0;
@@ -211,6 +212,21 @@ void AI::Update(void)
 		distance.x = TargetPos.x - UserInfo.pos.x;
 		distance.y = TargetPos.z - UserInfo.pos.z;
 		DestRotY = atan2(distance.x,distance.y);
+		if (distance.x*distance.x + distance.y*distance.y < 30.0f*30.0f)
+		{
+			Movement.x -= sinf(DEG2RAD(UserInfo.rot.y)) * Speed;
+			Movement.z -= cosf(DEG2RAD(UserInfo.rot.y)) * Speed;
+		}
+		else if (distance.x*distance.x + distance.y*distance.y > 60.0f*60.0f)
+		{
+			Movement.x += sinf(DEG2RAD(UserInfo.rot.y)) * Speed;
+			Movement.z += cosf(DEG2RAD(UserInfo.rot.y)) * Speed;
+		}
+	}
+	else
+	{
+		Movement.x += sinf(DEG2RAD(UserInfo.rot.y)) * Speed*0.5f;
+		Movement.z += cosf(DEG2RAD(UserInfo.rot.y)) * Speed*0.5f;
 	}
 	MazzleRevision();
 
