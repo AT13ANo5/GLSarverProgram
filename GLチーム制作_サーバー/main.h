@@ -18,11 +18,14 @@
 //----------------------------------------------------------------
 typedef enum
 {
+
 	DATA_TYPE_POS = 100,	//	位置
 	DATA_TYPE_ROT,	//	回転
 	DATA_TYPE_CANNONROT,	//	回転
 	DATA_TYPE_CANNON,	//	発射
 	DATA_TYPE_ENTRY,	//	エントリー
+	DATA_TYPE_GET_ENTRY,
+	DATA_TYPE_CHANGE_GAME,
 	DATA_TYPE_GAME_START,	//	ゲームスタート
 	DATA_TYPE_DEATH,	//	死んだ
 	DATA_TYPE_KILL,	//	殺した
@@ -77,6 +80,14 @@ typedef struct
 }DATA_PAUSE;
 //----------------------------------------------------------------
 
+//	コネクション用データ
+//----------------------------------------------------------------
+typedef struct
+{
+	bool entryFlag[6];	//	エントリーしてるかどうか
+}DATA_CONNECTION;
+//----------------------------------------------------------------
+
 //	送信時用データ
 //----------------------------------------------------------------
 typedef struct
@@ -93,6 +104,7 @@ typedef struct
 		DATA_ROT data_cannonRot;
 		DATA_CANNON data_cannon;
 		DATA_PAUSE data_pause;
+		DATA_CONNECTION data_connection;
 	};
 
 }NET_DATA;
