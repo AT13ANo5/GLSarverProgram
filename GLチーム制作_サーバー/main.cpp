@@ -368,8 +368,8 @@ int main(void)
 							data.data_pause.kill = userInfo[count].kill;
 							data.data_pause.death = userInfo[count].death;
 
-							//	データ送信
-							sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&userInfo[data.charNum].fromaddr, sizeof(userInfo[data.charNum].fromaddr));
+							//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+							sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 						}
 					}
 
@@ -381,7 +381,7 @@ int main(void)
 					if (data.charNum == 0)
 					{
 						// AI処理用スレッド開始
-						ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, NULL, NULL);
+						//ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, NULL, NULL);
 
 						//	ゲームスタートさせる
 						gameStartFlag = true;
@@ -396,9 +396,11 @@ int main(void)
 					if (data.charNum == 0)
 					{
 						//	他のクライアントにもゲームへの遷移を伝える
-						//	データ送信
-						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&userInfo[data.charNum].fromaddr, sizeof(userInfo[data.charNum].fromaddr));
+						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 					}
+
+					break;
 
 				case DATA_TYPE_GET_ENTRY:
 
@@ -413,8 +415,8 @@ int main(void)
 					//	ポートを再設定
 					recvAdd.sin_port = htons(3000);
 
-					//	部屋がいっぱいと送る
-					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
+					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 
 					break;
 
@@ -464,7 +466,7 @@ int main(void)
 									printf("Player%d Entry\n",charNum+1);
 
 									//	「エントリーした」という情報をマルチキャストで送信
-									sendto(recvSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
+									sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 								}
 							}
 							else
@@ -476,7 +478,8 @@ int main(void)
 								recvAdd.sin_port = htons(3000);
 
 								//	部屋がいっぱいと送る
-								sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
+								//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+								sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 							}
 
 							break;
