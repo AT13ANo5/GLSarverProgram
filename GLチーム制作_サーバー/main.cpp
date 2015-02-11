@@ -385,6 +385,7 @@ int main(void)
 
 						//	ゲームスタートさせる
 						gameStartFlag = true;
+						printf("GameStart!\n");
 					}
 
 					break;
@@ -459,6 +460,8 @@ int main(void)
 
 									//	ポートを再設定
 									recvAdd.sin_port = htons(3000);
+
+									printf("Player%d Entry\n",charNum+1);
 
 									//	「エントリーした」という情報をマルチキャストで送信
 									sendto(recvSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
