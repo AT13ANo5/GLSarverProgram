@@ -38,6 +38,7 @@ const int sendPort = 20000;
 USER_INFO userInfo[charcterMax];
 SOCKET sendSock;
 sockaddr_in sendAdd;
+bool gameStartFlag;
 
 const VECTOR3 ROCK_POSITION_LIST[] = {
 	VECTOR3(-214.0f,100.0f,421.0f),
@@ -208,6 +209,8 @@ int main(void)
 	PHOSTENT phostent;
 	IN_ADDR in;
 
+	gameStartFlag = false;
+
 	//	現在のキャラクター数
 	int charNum = -1;
 
@@ -255,19 +258,19 @@ int main(void)
 	recvAdd.sin_family = AF_INET;
 	recvAdd.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	int recvAddLength = sizeof(recvAdd);
-	
+
 	setsockopt(recvSock, SOL_SOCKET, SO_BROADCAST, (char *)&param, sizeof(param));
 
 	myBind(&recvSock, &recvAdd);
 	//-------------------------------------------------
 
 	AI::Initialize();
-	
+
 	UINT threadID = 0;
 
 	HANDLE ai = 0;
 #ifdef _DEBUG
-	ai = (HANDLE)_beginthreadex(NULL,0,&aiUpdate,NULL,0,&threadID);
+	ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, 0, &threadID);
 #endif
 	NET_DATA data;
 
@@ -379,65 +382,72 @@ int main(void)
 					{
 						// AI処理用スレッド開始
 						ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, NULL, NULL);
+
+						//	ゲームスタートさせる
+						gameStartFlag = true;
 					}
 
 					break;
 
 				case DATA_TYPE_ENTRY:
 
-					//	エントリー処理
-					//	現在のプレイヤー数を返し、自分のプレイヤー番号をセットさせる。
-				{
-					//	ループ処理判定フラグ
-					bool errorFlag = true;
-
-					//	キャラクター番号をインクリメント（キャラクター番号は0～5）
-					charNum++;
-
-					//	キャラクター数が一定値を超えていたら処理をはじく
-					if (charNum < charcterMax)
+					//	ゲームスタートしていなければ
+					if (gameStartFlag == false)
 					{
-						//	エラー処理（エントリー状態ならエラーとする）
-						if (userInfo[charNum].entryFlag == true)
+						//	エントリー処理
+						//	現在のプレイヤー数を返し、自分のプレイヤー番号をセットさせる。
 						{
-							//	キャラクタ番号をマイナスし、処理を弾く
-							charNum--;
-							errorFlag = false;
+							//	ループ処理判定フラグ
+							bool errorFlag = true;
+
+							//	キャラクター番号をインクリメント（キャラクター番号は0～5）
+							charNum++;
+
+							//	キャラクター数が一定値を超えていたら処理をはじく
+							if (charNum < charcterMax)
+							{
+								//	エラー処理（エントリー状態ならエラーとする）
+								if (userInfo[charNum].entryFlag == true)
+								{
+									//	キャラクタ番号をマイナスし、処理を弾く
+									charNum--;
+									errorFlag = false;
+
+									break;
+								}
+
+								//	エラー処理を抜けたら
+								if (errorFlag == true)
+								{
+									//	数値をセット
+									data.charNum = charNum;
+									data.servID = SERV_ID;
+									data.type = DATA_TYPE_ENTRY;
+
+									//	ユーザー情報をセット
+									userInfo[charNum].fromaddr = recvAdd;
+									userInfo[charNum].fromaddr.sin_port = htons(3000);
+									userInfo[charNum].entryFlag = true;
+
+									//	「エントリーした」という情報をマルチキャストで送信
+									sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+								}
+							}
+							else
+							{
+								data.type = DATA_TYPE_EMPTY;
+								data.servID = SERV_ID;
+
+								//	ポートを再設定
+								recvAdd.sin_port = htons(3000);
+
+								//	部屋がいっぱいと送る
+								sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
+							}
 
 							break;
 						}
-
-						//	エラー処理を抜けたら
-						if (errorFlag == true)
-						{
-							//	数値をセット
-							data.charNum = charNum;
-							data.servID = SERV_ID;
-							data.type = DATA_TYPE_ENTRY;
-
-							//	ユーザー情報をセット
-							userInfo[charNum].fromaddr = recvAdd;
-							userInfo[charNum].fromaddr.sin_port = htons(3000);
-							userInfo[charNum].entryFlag = true;
-
-							//	「エントリーした」という情報をマルチキャストで送信
-							sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
-						}
 					}
-					else
-					{
-						data.type = DATA_TYPE_EMPTY;
-						data.servID = SERV_ID;
-
-						//	ポートを再設定
-						recvAdd.sin_port = htons(3000);
-
-						//	部屋がいっぱいと送る
-						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
-					}
-
-					break;
-				}
 				}
 			}
 			else
