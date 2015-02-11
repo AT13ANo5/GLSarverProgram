@@ -30,7 +30,8 @@ public:
 	static void Finalize(void);
 
 	static void UpdateAll(void);
-	
+	static void UpdateInfomation(void);
+	static void SendState(void);
 	// Œ»İ‚Ì‘•“UŠÔƒQƒbƒ^[
 	int ReloadTimer(void){ return _ReloadTimer; }
 

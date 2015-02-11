@@ -1,51 +1,24 @@
-#define _CRT_SECURE_NO_WARNINGS
+#include <string.h>
+#include <Windows.h>
 #include "MeshGround.h"
-
 #define SUM_INDEX(X,Z) ((X+1)*(Z-1)+((X+1)*(Z+1))+(Z-1)*2)
 #define HEIGHT_MAP ("heightmap.bmp")
 
-CMeshGround::CMeshGround(int priority) :CObject(priority)
+CMeshGround::CMeshGround(void)
 {
-	_Pos = VECTOR3(0,0,0);
-	_Rot = VECTOR3(0,0,0);
-	Vtx = nullptr;
-	Tex = nullptr;
-	Nor = nullptr;
+	Index = nullptr;
 	NormalMap = nullptr;
 	HeightMap = nullptr;
+	Vtx = nullptr;
+	Nor = nullptr;
 }
 CMeshGround::~CMeshGround()
 {
-	if (Vtx != nullptr)
-	{
-		delete[] Vtx;
-		Vtx = nullptr;
-	}
-	if (Tex != nullptr)
-	{
-		delete[] Tex;
-		Tex = nullptr;
-	}
-	if (Nor != nullptr)
-	{
-		delete[] Nor;
-		Nor = nullptr;
-	}
-	if (NormalMap != nullptr)
-	{
-		delete[] NormalMap;
-		NormalMap = nullptr;
-	}
-	if (Index != nullptr)
-	{
-		delete[] Index;
-		Index = nullptr;
-	}
-	if (HeightMap != nullptr)
-	{
-		delete[] HeightMap;
-		HeightMap = nullptr;
-	}
+	SafeDeletes(Vtx);
+	SafeDeletes(Nor);
+	SafeDeletes(NormalMap);
+	SafeDeletes(Index);
+	SafeDeletes(HeightMap);
 }
 CMeshGround* CMeshGround::Create(VECTOR3 pos,VECTOR2 PanelSize,VECTOR2 PanelNum,float heightMag)
 {
@@ -73,9 +46,7 @@ void CMeshGround::Init(void)
 	LoadImg(HEIGHT_MAP);
 	NormalMap = new VECTOR3[MapNum];
 
-	
 	Vtx = new VECTOR3[VertexNum];
-	Tex = new VECTOR2[VertexNum];
 	Nor = new VECTOR3[VertexNum];
 
 	_Size.x = PanelNum.x*PanelSize.x;
@@ -92,9 +63,7 @@ void CMeshGround::Init(void)
 			if (num < VertexNum)
 			{
 				Vtx[num] = VECTOR3(OffsetX + (-PanelSize.x*LoopX),HeightMap[num],-OffsetZ + (PanelSize.y*LoopZ));
-				Tex[num] = VECTOR2((float)LoopX,(float)LoopZ);
 				Nor[num] = VECTOR3(0,1.0f,0);
-				_Color = COLOR(1.0f,1.0f,1.0f,1.0f);
 			}
 			num++;
 		}
@@ -247,8 +216,6 @@ void CMeshGround::Init(void)
 		}
 		VtxNo++;
 	}
-
-
 }
 
 void CMeshGround::Uninit(void)
@@ -257,8 +224,6 @@ void CMeshGround::Uninit(void)
 }
 void CMeshGround::Update(void)
 {
-	//Rot.x++;
-
 }
 
 void CMeshGround::GetPanelIndex(VECTOR3 pos,int* OutIndexX,int* OutIndexY)
@@ -268,7 +233,6 @@ void CMeshGround::GetPanelIndex(VECTOR3 pos,int* OutIndexX,int* OutIndexY)
 
 	*OutIndexX = (int)(PanelNum.x - pos.x / PanelSize.x);
 	*OutIndexY = (int)(pos.z / PanelSize.y);
-
 }
 
 float CMeshGround::GetHeight(VECTOR3 pos,VECTOR3* normal)
@@ -283,14 +247,6 @@ float CMeshGround::GetHeight(VECTOR3 pos,VECTOR3* normal)
 	VertexPos[2] = VECTOR3((0.5f * PanelNum.x - IndexX - 1) * PanelSize.x,HeightMap[Index + ((int)PanelNum.x + 2)],(-0.5f * PanelNum.y + IndexY + 1) * PanelSize.y);
 	VertexPos[3] = VECTOR3((0.5f * PanelNum.x - IndexX) * PanelSize.x,HeightMap[Index + ((int)PanelNum.x + 1)],(-0.5f * PanelNum.y + IndexY + 1) * PanelSize.y);
 
-#if 0
-	for (int cnt = 0;cnt<4;cnt++)
-	{
-		VertexPos[cnt].x -= _Size.x/2;
-		VertexPos[cnt].z -= _Size.z/2;
-		VertexPos[cnt].z *= -1;
-	}
-#endif
 	VECTOR3 Vec0 = VertexPos[1] - VertexPos[0];
 	VECTOR3 Vec1 = VECTOR3(0,0,0);
 
@@ -311,12 +267,10 @@ float CMeshGround::GetHeight(VECTOR3 pos,VECTOR3* normal)
 	}
 	if (flag)
 	{
-
 		return GetHeightPolygon(VertexPos[1],VertexPos[2],VertexPos[0],pos,normal);
 	}
 	else
 	{
-
 		return GetHeightPolygon(VertexPos[3],VertexPos[0],VertexPos[2],pos,normal);
 	}
 
@@ -325,12 +279,10 @@ float CMeshGround::GetHeight(VECTOR3 pos,VECTOR3* normal)
 
 float CMeshGround::GetHeightPolygon(const VECTOR3& p0,const VECTOR3& p1,const VECTOR3& p2,VECTOR3& pos,VECTOR3* Normal)
 {
-
 	VECTOR3 Vec1,Vec0;
 	VECTOR3 normal = VECTOR3(0,0,0);
 	Vec0 = p1 - p0;
 	Vec1 = p2 - p0;
-
 	VECTOR3::Cross(&normal,Vec0,Vec1);
 	normal.Normalize();
 	if (normal.y == 0.0f)
@@ -352,7 +304,7 @@ void CMeshGround::LoadImg(const char * imgFile)
 	BITMAPFILEHEADER bmfh;
 	BITMAPINFOHEADER bmih;//ƒwƒbƒ_[î•ñ
 	float FieldScl = HeightMag;
-	file = fopen(imgFile,"rb");
+	fopen_s(&file, imgFile,"rb");
 	if (file != NULL)
 	{
 		fread(&bmfh,sizeof(BITMAPFILEHEADER),1,file);

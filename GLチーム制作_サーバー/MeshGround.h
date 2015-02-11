@@ -6,23 +6,20 @@
 //=============================================================================
 //インクルード
 //=============================================================================
-#include "main.h"
-#include "Object.h"
+#include "CommonGL.h"
 
 typedef struct
 {
-	VECTOR2 uv;
-	COLOR diffuse;
 	VECTOR3 nor;
 	VECTOR3 pos;
 
 }VERTEX;
 
 //クラス定義
-class CMeshGround :public CObject
+class CMeshGround
 {
 public:
-	CMeshGround(int priority = 0);
+	CMeshGround(void);
 	~CMeshGround();
 	//=============================================================================
 	//作成
@@ -36,7 +33,8 @@ public:
 	void Init(void);
 	void Uninit(void);
 	void Update(void);
-	void Draw(void){};
+	void Draw(void);
+
 	//=============================================================================
 	//高さを取得
 	//=============================================================================
@@ -44,8 +42,11 @@ public:
 
 	//ゲッター
 	VECTOR3 Size(void)const{ return _Size; }
+	VECTOR3 Pos(void)const{ return _Pos; }
 	
 private:
+
+	VECTOR3 _Pos;
 
 	VECTOR3 _Size;
 	
@@ -58,8 +59,8 @@ private:
 	float HeightMag;//高さの倍率
 
 	VECTOR3* Vtx;
-	VECTOR2* Tex;
 	VECTOR3* Nor;
+
 	VECTOR3* NormalMap;
 	float* HeightMap;
 	int* Index;
