@@ -389,6 +389,34 @@ int main(void)
 
 					break;
 
+				case DATA_TYPE_CHANGE_GAME:
+
+					//	最上位クライアントから、ゲームへの遷移を受け取ったら
+					if (data.charNum == 0)
+					{
+						//	他のクライアントにもゲームへの遷移を伝える
+						//	データ送信
+						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&userInfo[data.charNum].fromaddr, sizeof(userInfo[data.charNum].fromaddr));
+					}
+
+				case DATA_TYPE_GET_ENTRY:
+
+					data.type = DATA_TYPE_GET_ENTRY;
+					data.servID = SERV_ID;
+
+					for (int count = 0; count < 6; count++)
+					{
+						data.data_connection.entryFlag[count] = userInfo[count].entryFlag;
+					}
+
+					//	ポートを再設定
+					recvAdd.sin_port = htons(3000);
+
+					//	部屋がいっぱいと送る
+					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
+
+					break;
+
 				case DATA_TYPE_ENTRY:
 
 					//	ゲームスタートしていなければ
@@ -429,8 +457,11 @@ int main(void)
 									userInfo[charNum].fromaddr.sin_port = htons(3000);
 									userInfo[charNum].entryFlag = true;
 
+									//	ポートを再設定
+									recvAdd.sin_port = htons(3000);
+
 									//	「エントリーした」という情報をマルチキャストで送信
-									sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+									sendto(recvSock, (char*)&data, sizeof(data), 0, (sockaddr*)&recvAdd, sizeof(recvAdd));
 								}
 							}
 							else
