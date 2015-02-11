@@ -270,7 +270,7 @@ int main(void)
 
 	HANDLE ai = 0;
 #ifdef _DEBUG
-	ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, 0, &threadID);
+	//ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, 0, &threadID);
 #endif
 	NET_DATA data;
 
