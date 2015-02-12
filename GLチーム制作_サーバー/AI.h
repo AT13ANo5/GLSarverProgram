@@ -26,7 +26,7 @@ class AI
 public:
 	AI();
 	~AI();
-	static void Initialize(void);
+	static void Initialize(int _charNum);
 	static void Finalize(void);
 
 	static void UpdateAll(void);
@@ -38,7 +38,7 @@ public:
 	// ëÃóÕÉQÉbÉ^Å[
 	int PlayerLife(void){ return _PlayerLife; }
 
-	static void SetUserInfo(USER_INFO* info);
+	static void SetUserInfo(USER_INFO* info, int _charNum);
 private:
 
 	static AI* Top;

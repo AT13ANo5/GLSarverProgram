@@ -81,6 +81,9 @@ const ROCK_DATA ROCK_DATA_LIST[] = {
 
 CMeshGround*	Ground;		// フィールド
 
+//	現在のキャラクター数
+int charNum = -1;
+
 //=============================================================================
 //	自作バインド関数
 //=============================================================================
@@ -229,8 +232,7 @@ int main(void)
 
 	gameStartFlag = false;
 
-	//	現在のキャラクター数
-	int charNum = -1;
+	charNum = -1;
 
 	//	Winsockの初期化
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != NULL)
@@ -282,7 +284,6 @@ int main(void)
 	myBind(&recvSock, &recvAdd);
 	//-------------------------------------------------
 
-	AI::Initialize();
 	initUserInfo();
 	UINT threadID = 0;
 
@@ -318,6 +319,13 @@ int main(void)
 					userInfo[data.charNum].pos.x = data.data_pos.posX;
 					userInfo[data.charNum].pos.y = data.data_pos.posY;
 					userInfo[data.charNum].pos.z = data.data_pos.posZ;
+
+					if (data.charNum == 0)
+					{
+						printf("posX = %f\n", data.data_pos.posX);
+						printf("posY = %f\n", data.data_pos.posY);
+						printf("posZ = %f\n", data.data_pos.posZ);
+					}
 
 					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
@@ -407,6 +415,18 @@ int main(void)
 					//	最上位クライアントから、ゲーム開始を受け取ったら
 					if (data.charNum == 0)
 					{
+
+						for (int count = charNum + 1; count < charcterMax; count++)
+						{
+							//	ユーザー情報をセット
+							userInfo[count].fromaddr = recvAdd;
+							userInfo[count].fromaddr.sin_port = htons(3000);
+							userInfo[count].entryFlag = false;
+						}
+
+
+						AI::Initialize(charNum + 1);
+
 						// AI処理用スレッド開始
 						ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, NULL, NULL);
 
@@ -528,7 +548,7 @@ int main(void)
 			}
 			else
 			{
-				printf("networkID Not Equal!!\n");
+				//printf("networkID Not Equal!!\n");
 			}
 		}
 	}
@@ -565,6 +585,11 @@ unsigned __stdcall aiUpdate(void *p)
 
 	FrameCount = 0;
 
+	if (charNum == 0)
+	{
+		userInfo[1].entryFlag = false;
+	}
+
 	//	クライアント側とFPSをそろえる
 	for (;;)
 	{
@@ -580,19 +605,22 @@ unsigned __stdcall aiUpdate(void *p)
 
 
 			//	AI更新処理
-			AI::SetUserInfo(userInfo);
+			AI::SetUserInfo(userInfo, charNum + 1);
 			AI::UpdateAll();
 			AI::UpdateInfomation();
 			PushBackCharacter();
 			PushBackRock();
 			PushBackField();
 			PushBackBattleArea();
-			for (int cnt = 0;cnt < charcterMax;cnt++)
+			for (int cnt = charNum + 1;cnt < charcterMax;cnt++)
 			{
-				aiSetPos		(cnt,userInfo[cnt].pos);
-				aiSetRot		(cnt,userInfo[cnt].rot);
-				aiSetCannonRot	(cnt,userInfo[cnt].cannonRot);
-				aiSetCannon		(cnt,userInfo[cnt].cannon);
+				if (userInfo[cnt].entryFlag == false)
+				{
+					aiSetPos(cnt, userInfo[cnt].pos);
+					aiSetRot(cnt, userInfo[cnt].rot);
+					aiSetCannonRot(cnt, userInfo[cnt].cannonRot);
+					aiSetCannon(cnt, userInfo[cnt].cannon);
+				}
 			}
 			PrevTime = CurrentTime;
 		}

@@ -86,6 +86,7 @@ typedef struct
 typedef struct
 {
 	bool entryFlag[6];	//	ÉGÉìÉgÉäÅ[ÇµÇƒÇÈÇ©Ç«Ç§Ç©
+
 }DATA_CONNECTION;
 //----------------------------------------------------------------
 
@@ -94,6 +95,7 @@ typedef struct
 typedef struct
 {
 	int value;
+
 }DATA_KILLDEATH;
 //----------------------------------------------------------------
 
@@ -145,7 +147,7 @@ typedef struct {
 } ROCK_DATA;
 //----------------------------------------------------------------
 
-static const int SERV_ID = 256;
+static const int SERV_ID = 128;
 
 void aiSetPos(int _charNum,VECTOR3 _pos);
 void aiSetRot(int _charNum,VECTOR3 _rot);

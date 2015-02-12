@@ -147,11 +147,11 @@ AI::~AI()
 //------------------------------------------------------------------------------
 //初期化
 //------------------------------------------------------------------------------
-void AI::Initialize(void)
+void AI::Initialize(int _charNum)
 {
 	//srand((unsigned)time(nullptr));
 	Field = CMeshGround::Create(VECTOR3(0.0f,0.0f,0.0f),VECTOR2(FIELD_PANEL_SIZE,FIELD_PANEL_SIZE),VECTOR2(0,0),1.5f);
-	for (int cnt = 0;cnt < UserMax;cnt++)
+	for (int cnt = _charNum;cnt < UserMax;cnt++)
 	{
 		AI* ai = new AI;
 		ai->ID = cnt;
@@ -365,10 +365,10 @@ void AI::Shot(void)
 //------------------------------------------------------------------------------
 //ユーザー情報をセット
 //------------------------------------------------------------------------------
-void AI::SetUserInfo(USER_INFO* info)
+void AI::SetUserInfo(USER_INFO* info, int _charNum)
 {
 	AI* ai = Top;
-	int cnt = 0;
+	int cnt = _charNum;
 	while (ai)
 	{
 		ai->UserInfo = info[cnt];
