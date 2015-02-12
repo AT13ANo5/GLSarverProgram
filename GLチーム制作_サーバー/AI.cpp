@@ -8,6 +8,7 @@
 #include "MeshGround.h"
 #include<float.h>
 #include <math.h>
+#include <time.h>
 
 //------------------------------------------------------------------------------
 //マクロ定義
@@ -31,14 +32,17 @@
 //------------------------------------------------------------------------------
 //定数定義
 //------------------------------------------------------------------------------
-const float PLAYER_MOVE_SPEED (0.25f);			// 移動にかかる係数
-const int UserMax = 6;//最大ユーザー数
-const double SURCH_MAX = 500.0f*500.0f;	//フィールドのサイズの1/4
-const float GRAVITY = -0.06f;				//弾にかかる重力加速度
-const float BULLET_SPEED = 3.0f;			//弾の速度
-const float TURN_SPEED = 3.0f;		//回転速度
+const float PLAYER_MOVE_SPEED (0.05f);			// 移動にかかる係数
+const float TURN_SPEED = 1.0f;		//回転速度
 const int PLAYER_RELOAD_TIME (300);			// リロードまでのフレーム
+const int UserMax = 6;//最大ユーザー数
+const double SURCH_MAX = 300.0f;	//フィールドのサイズの1/4
+const float GRAVITY = 0.06f;				//弾にかかる重力加速度
+const float BULLET_SPEED = 3.5f;			//弾の速度
 const float FIELD_PANEL_SIZE = 35.0f;			//フィールドのパネル一枚のサイズ
+const float MAXANGLE = (-45.0f);
+const float MAX_RANGE = 202.0f;
+const float MIN_RANGE = 70.0f;
 //------------------------------------------------------------------------------
 //静的メンバ変数定義
 //------------------------------------------------------------------------------
@@ -130,6 +134,7 @@ AI::AI()
 	DestRotY = 0;
 	frame = 0;
 	_ReloadTimer = 0;
+	Distance = FLT_MAX;
 	LinkList();
 }
 //------------------------------------------------------------------------------
@@ -144,6 +149,7 @@ AI::~AI()
 //------------------------------------------------------------------------------
 void AI::Initialize(void)
 {
+	//srand((unsigned)time(nullptr));
 	Field = CMeshGround::Create(VECTOR3(0.0f,0.0f,0.0f),VECTOR2(FIELD_PANEL_SIZE,FIELD_PANEL_SIZE),VECTOR2(0,0),1.5f);
 	for (int cnt = 0;cnt < UserMax;cnt++)
 	{
@@ -173,6 +179,7 @@ void AI::Finalize(void)
 //------------------------------------------------------------------------------
 void AI::UpdateAll(void)
 {
+	
 	AI* ai = Top;
 
 	while (ai)
@@ -224,7 +231,15 @@ void AI::Update(void)
 
 	if (frame % 120 == 0)
 	{
-		SurchTarget();
+		if (TargetId < 0)
+		{
+			SurchTarget();
+			
+		}
+		else
+		{
+			TargetId = -1;
+		}
 	}
 
 	UserInfo.pos += Movement;
@@ -235,13 +250,13 @@ void AI::Update(void)
 		VECTOR2 distance = VECTOR2(0,0);
 		distance.x = TargetPos.x - UserInfo.pos.x;
 		distance.y = TargetPos.z - UserInfo.pos.z;
-
-		if (distance.x*distance.x + distance.y*distance.y < 150.0f*150.0f)
+		double dis = sqrt(distance.x*distance.x + distance.y*distance.y);
+		if (dis < MIN_RANGE)
 		{
 			Movement.x -= sinf(DEG2RAD(UserInfo.rot.y)) * Speed;
 			Movement.z -= cosf(DEG2RAD(UserInfo.rot.y)) * Speed;
 		}
-		else// if (distance.x*distance.x + distance.y*distance.y > 200.0f*200.0f)
+		else if (dis > MAX_RANGE*0.5f)
 		{
 			Movement.x += sinf(DEG2RAD(UserInfo.rot.y)) * Speed;
 			Movement.z += cosf(DEG2RAD(UserInfo.rot.y)) * Speed;
@@ -257,7 +272,13 @@ void AI::Update(void)
 		}
 		Movement.x += sinf(DEG2RAD(UserInfo.rot.y)) * Speed;
 		Movement.z += cosf(DEG2RAD(UserInfo.rot.y)) * Speed;
-		SurchTarget();
+		//SurchTarget();
+	}
+
+	frame++;
+	if (frame > 60 * 30)
+	{
+		frame = 0;
 	}
 
 	Movement *= 0.95f;
@@ -286,11 +307,7 @@ void AI::Update(void)
 	}
 	UserInfo.rot.y +=SubRotY;
 	REVISE_PI_DEG(UserInfo.rot.y);
-	frame++;
-	if (frame > 60 * 30)
-	{
-		frame = 0;
-	}
+	
 }
 
 //------------------------------------------------------------------------------
@@ -312,7 +329,7 @@ void AI::SurchTarget(void)
 		}
 		Sub.x = ai->UserInfo.pos.x - UserInfo.pos.x;
 		Sub.y = ai->UserInfo.pos.z - UserInfo.pos.z;
-		disBuff = (Sub.x*Sub.x+Sub.y*Sub.y);
+		disBuff = sqrt(Sub.x*Sub.x+Sub.y*Sub.y);
 		if (disBuff > SURCH_MAX)
 		{
 			ai = ai->Next;
@@ -334,7 +351,7 @@ void AI::SurchTarget(void)
 //------------------------------------------------------------------------------
 void AI::Shot(void)
 {
-	if (TargetId == -1)
+	if (TargetId == -1 || Distance > MAX_RANGE)
 	{
 		BarrelRotX = 0;
 		return;
@@ -366,20 +383,31 @@ void AI::MazzleRevision(void)
 {
 	if (TargetId >= 0)
 	{
+
 		VECTOR3 DestPos = TargetPos;
 		VECTOR3 Sub = TargetPos - UserInfo.pos;
 		VECTOR3 Dis = VECTOR3(0,0,0);
 		float time = Sub.x / BULLET_SPEED;
-		float distance = sqrt(Sub.x*Sub.x + Sub.z*Sub.z);
+		Distance = sqrt(Sub.x*Sub.x + Sub.z*Sub.z);
 
-		DestPos += TargetSpeed * (distance / BULLET_SPEED);
+		DestPos += TargetSpeed * (Distance / BULLET_SPEED);
 
 		Sub = DestPos - UserInfo.pos;
-		distance = sqrt(Sub.x*Sub.x + Sub.z*Sub.z);
+		Distance = sqrt(Sub.x*Sub.x + Sub.z*Sub.z);
 
 		Dis.x = BULLET_SPEED;
-		BarrelRotX = -asin((distance*0.25f) / (BULLET_SPEED*BULLET_SPEED))*0.5f;
 
+		//BarrelRotX = -asin((distance*GRAVITY) / (BULLET_SPEED*BULLET_SPEED))*0.5f;
+
+		float per = Distance/MAX_RANGE;
+		if (Distance > MAX_RANGE)
+		{
+			BarrelRotX = DEG2RAD(-10.0f);
+		}
+		else
+		{
+			BarrelRotX = DEG2RAD(MAXANGLE*per);
+		}
 		DestRotY = atan2(Sub.x,Sub.z);
 		REVISE_PI(DestRotY);
 		DestRotY = RAD2DEG(DestRotY);
@@ -387,5 +415,5 @@ void AI::MazzleRevision(void)
 	REVISE_PI(BarrelRotX);
 
 	UserInfo.cannonRot = UserInfo.rot;
-	UserInfo.cannonRot.x = RAD2DEG(BarrelRotX) - 5.0f;
+	UserInfo.cannonRot.x = RAD2DEG(BarrelRotX);
 }

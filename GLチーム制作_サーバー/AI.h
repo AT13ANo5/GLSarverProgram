@@ -68,6 +68,7 @@ private:
 	VECTOR3 Movement;	// 移動量
 	float Speed;		// 移動速度
 	float BarrelRotX;	// 砲身のX軸回転量
+	float Distance;
 	bool LaunchFlag;	// 弾発射フラグ（true / 使用：false / 不使用）
 	int _ReloadTimer;	// 現在の装填時間
 	int _PlayerLife;	// 体力
