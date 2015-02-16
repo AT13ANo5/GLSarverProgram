@@ -320,12 +320,6 @@ int main(void)
 					userInfo[data.charNum].pos.y = data.data_pos.posY;
 					userInfo[data.charNum].pos.z = data.data_pos.posZ;
 
-					if (data.charNum == 0)
-					{
-						printf("posX = %f\n", data.data_pos.posX);
-						printf("posY = %f\n", data.data_pos.posY);
-						printf("posZ = %f\n", data.data_pos.posZ);
-					}
 
 					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
@@ -456,6 +450,10 @@ int main(void)
 					{
 						//	他のクライアントにもゲームへの遷移を伝える
 						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+
+						AI::Finalize();
+						CloseHandle(ai);
+
 						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 					}
 
