@@ -134,6 +134,7 @@ typedef struct {
 	VECTOR3 rot;
 	VECTOR3 cannonRot;
 	bool cannon;
+	bool deathFlag;
 
 } USER_INFO;
 //----------------------------------------------------------------

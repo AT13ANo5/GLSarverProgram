@@ -224,7 +224,7 @@ void AI::SendState(void)
 //------------------------------------------------------------------------------
 void AI::Update(void)
 {
-	if (UserInfo.entryFlag)
+	if (UserInfo.entryFlag || UserInfo.deathFlag)
 	{
 		return ;
 	}
