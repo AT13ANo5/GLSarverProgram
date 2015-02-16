@@ -127,6 +127,7 @@ void initUserInfo()
 		userInfo[count].rot = VECTOR3(0.0f, 0.0f, 0.0f);
 		userInfo[count].cannonRot = VECTOR3(0.0f, 0.0f, 0.0f);
 		userInfo[count].cannon = false;
+		userInfo[count].deathFlag = false;
 	}
 }
 
@@ -168,9 +169,11 @@ void aiSetRot(int _charNum, VECTOR3 _rot)
 	data.charNum = _charNum;
 	data.type = DATA_TYPE_ROT;
 	data.servID = SERV_ID;
-	data.data_rot.rotX = _rot.x;
+	/*data.data_rot.rotX = _rot.x;
 	data.data_rot.rotY = _rot.y;
-	data.data_rot.rotZ = _rot.z;
+	data.data_rot.rotZ = _rot.z;*/
+
+	data.data_rot.rotY = _rot.y;
 
 	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
@@ -330,9 +333,7 @@ int main(void)
 				case DATA_TYPE_ROT:
 
 					//	回転情報のセット
-					userInfo[data.charNum].rot.x = data.data_rot.rotX;
 					userInfo[data.charNum].rot.y = data.data_rot.rotY;
-					userInfo[data.charNum].rot.z = data.data_rot.rotZ;
 
 					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
@@ -378,6 +379,13 @@ int main(void)
 
 					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+
+					break;
+
+
+				case DATA_TYPE_SEND_DEATH:
+
+					userInfo[data.charNum].deathFlag = true;
 
 					break;
 
@@ -825,7 +833,6 @@ void PushBackBattleArea(void)
 			float	distancePushBack = sqrtf(distanceFromCenter) - RADIUS_AREA_BATTLE;
 			vectoruserInfoToCenter.Normalize();
 			infoPlayer.pos += vectoruserInfoToCenter * distancePushBack;
-			
 		}
 		userInfo[cntPlayer].pos = infoPlayer.pos;
 	}

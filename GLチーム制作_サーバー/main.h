@@ -29,6 +29,7 @@ typedef enum
 	DATA_TYPE_CHANGE_RESULT,
 	DATA_TYPE_GAME_START,	//	ゲームスタート
 	DATA_TYPE_DEATH,	//	死んだ
+	DATA_TYPE_SEND_DEATH,
 	DATA_TYPE_KILL,	//	殺した
 	DATA_TYPE_PAUSE,	//	ポーズ状態
 	DATA_TYPE_EMPTY,	//	満杯
@@ -51,6 +52,30 @@ typedef struct
 }DATA_POS;
 //----------------------------------------------------------------
 
+//#define ROT_NORMAL
+#define ROT_QUART
+//	回転情報
+//----------------------------------------------------------------
+typedef struct
+{
+	float rotY;
+/*#ifdef ROT_NORMAL
+	float rotX;
+	float rotY;
+	float rotZ;
+#endif
+
+#ifdef ROT_QUART
+	float X;
+	float Y;
+	float Z;
+	float rot;
+	float yRotation;
+#endif*/
+
+}DATA_ROT;
+//----------------------------------------------------------------
+
 //	回転情報
 //----------------------------------------------------------------
 typedef struct
@@ -59,7 +84,7 @@ typedef struct
 	float rotY;
 	float rotZ;
 
-}DATA_ROT;
+}DATA_CANNON_ROT;
 //----------------------------------------------------------------
 
 //	発射フラグ
@@ -112,7 +137,7 @@ typedef struct
 	{
 		DATA_POS data_pos;
 		DATA_ROT data_rot;
-		DATA_ROT data_cannonRot;
+		DATA_CANNON_ROT data_cannonRot;
 		DATA_CANNON data_cannon;
 		DATA_PAUSE data_pause;
 		DATA_CONNECTION data_connection;
@@ -129,6 +154,7 @@ typedef struct {
 	bool entryFlag;	//	エントリーフラグ
 	int kill;	//	殺した数
 	int death;	//	殺された数
+	bool deathFlag;
 
 	VECTOR3 pos;
 	VECTOR3 rot;
