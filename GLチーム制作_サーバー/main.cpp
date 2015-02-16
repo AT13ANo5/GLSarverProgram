@@ -43,17 +43,18 @@ SOCKET sendSock;
 sockaddr_in sendAdd;
 bool gameStartFlag;
 
-const float	RADIUS_DEFENSE_CHARACTER = 10.0f;	// キャラクターの防御半径
-const float	HEIGHT_DEFENSE_CHARACTER = 10.0f;	// キャラクターの防御中心高さ
+const float	RADIUS_DEFENSE_CHARACTER = 12.0f;	// キャラクターの防御半径
+const float	HEIGHT_DEFENSE_CHARACTER = 0.0f;	// キャラクターの防御中心高さ
 const float	RADIUS_OFFENSE_BULLET = 10.0f;		// 砲弾の攻撃半径
-const float	HEIGHT_OFFENSE_BULLET = 10.0f;		// 砲弾の攻撃中心高さ
+const float	HEIGHT_OFFENSE_BULLET = 0.0f;		// 砲弾の攻撃中心高さ
 const float	RADIUS_PUSH_CHARACTER = 10.0f;		// キャラクターの押し戻し半径
-const float	HEIGHT_PUSH_CHARACTER = 10.0f;		// キャラクターの押し戻し中心高さ
-const float	RADIUS_DEFENSE_ROCK = 45.0f;		// 岩の防御半径
-const float	HEIGHT_DEFENSE_ROCK = 45.0f;		// 岩の防御中心高さ
-const float	RADIUS_PUSH_ROCK = 45.0f;			// 岩の押し戻し半径
-const float	HEIGHT_PUSH_ROCK = 45.0f;			// 岩の押し戻し中心高さ
-const float	FIELD_PANEL_SIZE = 35.0f;			//フィールドのパネル一枚のサイズ
+const float	HEIGHT_PUSH_CHARACTER = 0.0f;		// キャラクターの押し戻し中心高さ
+const float	RADIUS_DEFENSE_ROCK = 28.0f;		// 岩の防御半径
+const float	HEIGHT_DEFENSE_ROCK = 0.0f;			// 岩の防御中心高さ
+const float	RADIUS_PUSH_ROCK = 38.0f;			// 岩の押し戻し半径
+const float	HEIGHT_PUSH_ROCK = 0.0f;			// 岩の押し戻し中心高さ
+const float FIELD_PANEL_SIZE = 35.0f;			//フィールドのパネル一枚のサイズ
+const float	HEIGHT_PLAYER_TO_FIELD = 10.0f;		// プレイヤーと地面の差
 const float	RADIUS_AREA_BATTLE = 1000.0f;		// 戦闘エリア半径
 
 const ROCK_DATA ROCK_DATA_LIST[] = {
