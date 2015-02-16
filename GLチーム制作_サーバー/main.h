@@ -147,7 +147,7 @@ typedef struct {
 } ROCK_DATA;
 //----------------------------------------------------------------
 
-static const int SERV_ID = 128;
+static const int SERV_ID = 130;
 
 void aiSetPos(int _charNum,VECTOR3 _pos);
 void aiSetRot(int _charNum,VECTOR3 _rot);
