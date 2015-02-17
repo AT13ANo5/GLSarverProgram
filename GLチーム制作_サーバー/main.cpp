@@ -330,6 +330,20 @@ int main(void)
 						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 					}
 
+					if (userInfo[data.charNum].deathFlag == true)
+					{
+						if (userInfo[data.charNum].entryFlag == false)
+						{
+							//	位置情報のセット
+							userInfo[data.charNum].pos.x = data.data_pos.posX;
+							userInfo[data.charNum].pos.y = data.data_pos.posY;
+							userInfo[data.charNum].pos.z = data.data_pos.posZ;
+
+							//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+							sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+						}
+					}
+
 					break;
 
 				case DATA_TYPE_ROT:
@@ -341,6 +355,15 @@ int main(void)
 
 						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+					}
+
+					if (userInfo[data.charNum].deathFlag == true)
+					{
+						if (userInfo[data.charNum].entryFlag == false)
+						{
+							//	回転情報のセット
+							userInfo[data.charNum].rot.y = data.data_rot.rotY;
+						}
 					}
 
 					break;
@@ -356,6 +379,17 @@ int main(void)
 
 						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+					}
+
+					if (userInfo[data.charNum].deathFlag == true)
+					{
+						if (userInfo[data.charNum].entryFlag == false)
+						{
+							//	回転情報のセット
+							userInfo[data.charNum].cannonRot.x = data.data_cannonRot.rotX;
+							userInfo[data.charNum].cannonRot.y = data.data_cannonRot.rotY;
+							userInfo[data.charNum].cannonRot.z = data.data_cannonRot.rotZ;
+						}
 					}
 
 					break;
@@ -435,7 +469,6 @@ int main(void)
 					//	最上位クライアントから、ゲーム開始を受け取ったら
 					if (data.charNum == 0)
 					{
-
 						for (int count = charNum + 1; count < charcterMax; count++)
 						{
 							//	ユーザー情報をセット
@@ -443,7 +476,6 @@ int main(void)
 							userInfo[count].fromaddr.sin_port = htons(3000);
 							userInfo[count].entryFlag = false;
 						}
-
 
 						AI::Initialize(charNum + 1);
 
