@@ -820,8 +820,7 @@ void PushBackObjectByField(VECTOR3* pPosition)
 {
 	// 地形とのあたり判定
 	VECTOR3	NormalGround;		// 地形の法線
-	float	HeightGround;		// 地形の高さ
-	pPosition->y = Ground->GetHeight(*pPosition, &NormalGround);
+	pPosition->y = Ground->GetHeight(*pPosition, &NormalGround) + HEIGHT_PLAYER_TO_FIELD;;
 }
 
 //==============================================================================
