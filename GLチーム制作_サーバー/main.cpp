@@ -319,46 +319,57 @@ int main(void)
 				{
 				case DATA_TYPE_POS:
 
-					//	位置情報のセット
-					userInfo[data.charNum].pos.x = data.data_pos.posX;
-					userInfo[data.charNum].pos.y = data.data_pos.posY;
-					userInfo[data.charNum].pos.z = data.data_pos.posZ;
+					if (userInfo[data.charNum].entryFlag == true)
+					{
+						//	位置情報のセット
+						userInfo[data.charNum].pos.x = data.data_pos.posX;
+						userInfo[data.charNum].pos.y = data.data_pos.posY;
+						userInfo[data.charNum].pos.z = data.data_pos.posZ;
 
-
-					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
-					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+					}
 
 					break;
 
 				case DATA_TYPE_ROT:
 
-					//	回転情報のセット
-					userInfo[data.charNum].rot.y = data.data_rot.rotY;
+					if (userInfo[data.charNum].entryFlag == true)
+					{
+						//	回転情報のセット
+						userInfo[data.charNum].rot.y = data.data_rot.rotY;
 
-					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
-					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+					}
 
 					break;
 
 				case DATA_TYPE_CANNONROT:
 
-					//	回転情報のセット
-					userInfo[data.charNum].cannonRot.x = data.data_cannonRot.rotX;
-					userInfo[data.charNum].cannonRot.y = data.data_cannonRot.rotY;
-					userInfo[data.charNum].cannonRot.z = data.data_cannonRot.rotZ;
+					if (userInfo[data.charNum].entryFlag == true)
+					{
+						//	回転情報のセット
+						userInfo[data.charNum].cannonRot.x = data.data_cannonRot.rotX;
+						userInfo[data.charNum].cannonRot.y = data.data_cannonRot.rotY;
+						userInfo[data.charNum].cannonRot.z = data.data_cannonRot.rotZ;
 
-					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
-					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+					}
 
 					break;
 
 				case DATA_TYPE_CANNON:
 
-					//	発射フラグのセット
-					userInfo[data.charNum].cannon = data.data_cannon.flag;
+					if (userInfo[data.charNum].entryFlag == true)
+					{
+						//	発射フラグのセット
+						userInfo[data.charNum].cannon = data.data_cannon.flag;
 
-					//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
-					sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+					}
 
 					break;
 
@@ -386,6 +397,12 @@ int main(void)
 				case DATA_TYPE_SEND_DEATH:
 
 					userInfo[data.charNum].deathFlag = true;
+
+					break;
+
+				case DATA_TYPE_SEND_REBORN:
+
+					userInfo[data.charNum].deathFlag = false;
 
 					break;
 
@@ -609,8 +626,6 @@ unsigned __stdcall aiUpdate(void *p)
 
 		if (CurrentTime - PrevTime >= 1000 / 60)
 		{
-
-
 			//	AI更新処理
 			AI::SetUserInfo(userInfo, charNum + 1);
 			AI::UpdateAll();
@@ -623,10 +638,13 @@ unsigned __stdcall aiUpdate(void *p)
 			{
 				if (userInfo[cnt].entryFlag == false)
 				{
-					aiSetPos(cnt, userInfo[cnt].pos);
-					aiSetRot(cnt, userInfo[cnt].rot);
-					aiSetCannonRot(cnt, userInfo[cnt].cannonRot);
-					aiSetCannon(cnt, userInfo[cnt].cannon);
+					if (userInfo[cnt].deathFlag == false)
+					{
+						aiSetPos(cnt, userInfo[cnt].pos);
+						aiSetRot(cnt, userInfo[cnt].rot);
+						aiSetCannonRot(cnt, userInfo[cnt].cannonRot);
+						aiSetCannon(cnt, userInfo[cnt].cannon);
+					}
 				}
 			}
 			PrevTime = CurrentTime;

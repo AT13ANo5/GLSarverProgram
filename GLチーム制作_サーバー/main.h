@@ -30,6 +30,7 @@ typedef enum
 	DATA_TYPE_GAME_START,	//	ゲームスタート
 	DATA_TYPE_DEATH,	//	死んだ
 	DATA_TYPE_SEND_DEATH,
+	DATA_TYPE_SEND_REBORN,
 	DATA_TYPE_KILL,	//	殺した
 	DATA_TYPE_PAUSE,	//	ポーズ状態
 	DATA_TYPE_EMPTY,	//	満杯
@@ -160,7 +161,7 @@ typedef struct {
 	VECTOR3 rot;
 	VECTOR3 cannonRot;
 	bool cannon;
-	bool deathFlag;
+	//bool deathFlag;
 
 } USER_INFO;
 //----------------------------------------------------------------
