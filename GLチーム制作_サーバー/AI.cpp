@@ -288,8 +288,8 @@ void AI::Update(void)
 
 	if (_ReloadTimer >= PLAYER_RELOAD_TIME)
 	{
-		LaunchFlag = false;
-		_ReloadTimer = PLAYER_RELOAD_TIME;
+		LaunchFlag = true;
+		_ReloadTimer = 0;
 	}
 	
 	Shot();
@@ -357,10 +357,15 @@ void AI::Shot(void)
 		return;
 	}
 
-	LaunchFlag = false;
-	UserInfo.cannon = true;
-
-	
+	if (LaunchFlag == true)
+	{
+		LaunchFlag = false;
+		UserInfo.cannon = true;
+	}
+	else
+	{
+		UserInfo.cannon = false;
+	}
 }
 //------------------------------------------------------------------------------
 //ユーザー情報をセット

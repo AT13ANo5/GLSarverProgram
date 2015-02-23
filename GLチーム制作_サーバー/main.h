@@ -175,8 +175,6 @@ typedef struct {
 } ROCK_DATA;
 //----------------------------------------------------------------
 
-static const int SERV_ID = 130;
-
 void aiSetPos(int _charNum,VECTOR3 _pos);
 void aiSetRot(int _charNum,VECTOR3 _rot);
 void aiSetCannonRot(int _charNum,VECTOR3 _cannonRot);
@@ -195,6 +193,9 @@ void PushBackObjectByField(VECTOR3* pPosition);	// ƒIƒuƒWƒFƒNƒg‚Ì’nŒ`‚É‚æ‚é‰Ÿ‚µ–
 void PushBackBattleArea(void);					// s“®‰Â”\”ÍˆÍ‚Ì‰Ÿ‚µ–ß‚µ
 bool NeedsSkipPlayer(int index);				// ƒvƒŒƒCƒ„[”»’èƒXƒLƒbƒv
 bool NeedsSkipBullet(int index);				// –C’e”»’èƒXƒLƒbƒv
+
+
+static const int SERV_ID = 131;
 
 #endif
 

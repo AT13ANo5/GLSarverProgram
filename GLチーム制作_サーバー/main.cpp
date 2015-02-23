@@ -80,6 +80,24 @@ const ROCK_DATA ROCK_DATA_LIST[] = {
 	{ VECTOR3(-171.0f,100.0f,-274.0f),	VECTOR3( 0.0f, 0.0f, 0.0f ),	VECTOR3( 1.0f, 1.0f, 1.0f ) }
 };
 
+const VECTOR3 PLAYER_POSITION_LIST[] = {
+	VECTOR3(-0.0f, 100.0f, 800),
+	VECTOR3(690, 100.0f, 400),
+	VECTOR3(690, 100.0f, -400),
+	VECTOR3(0, 100.0f, -800),
+	VECTOR3(-700, 100.0f, -400),
+	VECTOR3(-700, 100.0f, 400),
+};
+
+const VECTOR3 PLAYER_ROTATION_LIST[] = {
+	VECTOR3(0, 180, 0),
+	VECTOR3(0, 240.0f, 0),
+	VECTOR3(0, 300.0f, 0),
+	VECTOR3(0, 0, 0),
+	VECTOR3(0, 60.0f, 0),
+	VECTOR3(0, 120.0f, 0),
+};
+
 CMeshGround*	Ground;		// フィールド
 
 //	現在のキャラクター数
@@ -123,8 +141,8 @@ void initUserInfo()
 		userInfo[count].entryFlag = false;
 		userInfo[count].death = 0;
 		userInfo[count].kill = 0;
-		userInfo[count].pos = VECTOR3(rand() % 1000 - 500.0f,30.0f,rand() % 1000 - 500.0f);
-		userInfo[count].rot = VECTOR3(0.0f, 0.0f, 0.0f);
+		userInfo[count].pos = PLAYER_POSITION_LIST[count];
+		userInfo[count].rot = PLAYER_ROTATION_LIST[count];
 		userInfo[count].cannonRot = VECTOR3(0.0f, 0.0f, 0.0f);
 		userInfo[count].cannon = false;
 		userInfo[count].deathFlag = false;
@@ -469,18 +487,19 @@ int main(void)
 					//	最上位クライアントから、ゲーム開始を受け取ったら
 					if (data.charNum == 0)
 					{
+						AI::Initialize(charNum + 1);
+
+						// AI処理用スレッド開始
+						ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, NULL, NULL);
+
 						for (int count = charNum + 1; count < charcterMax; count++)
 						{
 							//	ユーザー情報をセット
 							userInfo[count].fromaddr = recvAdd;
 							userInfo[count].fromaddr.sin_port = htons(3000);
 							userInfo[count].entryFlag = false;
+							userInfo[count].deathFlag = true;
 						}
-
-						AI::Initialize(charNum + 1);
-
-						// AI処理用スレッド開始
-						ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, NULL, NULL);
 
 						//	ゲームスタートさせる
 						gameStartFlag = true;
@@ -666,7 +685,7 @@ unsigned __stdcall aiUpdate(void *p)
 			PushBackRock();
 			PushBackField();
 			PushBackBattleArea();
-			for (int cnt = charNum + 1;cnt < charcterMax;cnt++)
+			for (int cnt = charNum + 1; cnt < charcterMax; cnt++)
 			{
 				if (userInfo[cnt].entryFlag == false)
 				{
@@ -679,6 +698,7 @@ unsigned __stdcall aiUpdate(void *p)
 					}
 				}
 			}
+			
 			PrevTime = CurrentTime;
 		}
 	}
