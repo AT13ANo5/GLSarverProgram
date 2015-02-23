@@ -44,6 +44,8 @@ sockaddr_in sendAdd;
 bool gameStartFlag;
 
 int timer;
+int gameTime;
+HANDLE ai;
 
 const float	RADIUS_DEFENSE_CHARACTER = 12.0f;	// キャラクターの防御半径
 const float	HEIGHT_DEFENSE_CHARACTER = 0.0f;	// キャラクターの防御中心高さ
@@ -150,11 +152,28 @@ void initUserInfo()
 		userInfo[count].deathFlag = false;
 	}
 }
+//=============================================================================
+//	タイマー送信処理
+//=============================================================================
 void sendTimer()
 {
 	NET_DATA data;
 
 	data.type = DATA_TYPE_TIMER;
+	data.servID = SERV_ID;
+
+	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+}
+//=============================================================================
+//	リザルトへの移行送信処理
+//=============================================================================
+void sendChangeResult()
+{
+	NET_DATA data;
+
+	data.type = DATA_TYPE_CHANGE_RESULT;
+	data.charNum = 0;
 	data.servID = SERV_ID;
 
 	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
@@ -249,7 +268,21 @@ void aiSetCannon(int _charNum, bool _flag)
 	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
 	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 }
+//=============================================================================
+//	リセット処理関数
+//=============================================================================
+void Reset()
+{
+	initUserInfo();
 
+	charNum = -1;
+
+	timer = 0;
+	gameTime = 183;
+	ai = 0;
+
+	gameStartFlag = false;
+}
 //=============================================================================
 //	メイン処理関数
 //=============================================================================
@@ -321,11 +354,13 @@ int main(void)
 
 
 	timer = 0;
+	gameTime = 183;
 
 
 	UINT threadID = 0;
 
-	HANDLE ai = 0;
+	ai = 0;
+
 #ifdef _DEBUG
 	//ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, 0, &threadID);
 #endif
@@ -541,16 +576,13 @@ int main(void)
 
 				case DATA_TYPE_CHANGE_RESULT:
 
-					//	最上位クライアントから、ゲームへの遷移を受け取ったら
 					if (data.charNum == 0)
 					{
-						//	他のクライアントにもゲームへの遷移を伝える
-						//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
-
+						Reset();
 						AI::Finalize();
 						CloseHandle(ai);
+						_endthreadex(0);
 						ai = 0;
-						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 					}
 
 					break;
@@ -725,8 +757,17 @@ unsigned __stdcall aiUpdate(void *p)
 
 			if (timer == 60)
 			{
-				set
+				sendTimer();
 				timer = 0;
+				gameTime--;
+
+				/*if (gameTime == -1)
+				{
+					//sendChangeResult();
+					AI::Finalize();
+					CloseHandle(ai);
+					ai = 0;
+				}*/
 			}
 		}
 	}
