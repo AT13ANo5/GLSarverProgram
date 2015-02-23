@@ -490,7 +490,10 @@ int main(void)
 						AI::Initialize(charNum + 1);
 
 						// AI処理用スレッド開始
-						ai = (HANDLE)_beginthreadex(NULL, 0, &aiUpdate, NULL, NULL, NULL);
+						if (ai == 0)
+						{
+							ai = (HANDLE)_beginthreadex(NULL,0,&aiUpdate,NULL,NULL,NULL);
+						}
 
 						for (int count = charNum + 1; count < charcterMax; count++)
 						{
@@ -530,7 +533,7 @@ int main(void)
 
 						AI::Finalize();
 						CloseHandle(ai);
-
+						ai = 0;
 						sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
 					}
 
@@ -632,6 +635,7 @@ int main(void)
 	SafeDelete(Ground);
 
 	CloseHandle(ai);
+	ai = 0;
 	// ソケット終了
 	closesocket(recvSock);
 
