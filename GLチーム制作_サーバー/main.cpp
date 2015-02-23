@@ -43,6 +43,8 @@ SOCKET sendSock;
 sockaddr_in sendAdd;
 bool gameStartFlag;
 
+int timer;
+
 const float	RADIUS_DEFENSE_CHARACTER = 12.0f;	// キャラクターの防御半径
 const float	HEIGHT_DEFENSE_CHARACTER = 0.0f;	// キャラクターの防御中心高さ
 const float	RADIUS_OFFENSE_BULLET = 10.0f;		// 砲弾の攻撃半径
@@ -148,7 +150,16 @@ void initUserInfo()
 		userInfo[count].deathFlag = false;
 	}
 }
+void sendTimer()
+{
+	NET_DATA data;
 
+	data.type = DATA_TYPE_TIMER;
+	data.servID = SERV_ID;
+
+	//	マルチキャストで送信（送信先で自分のデータだったら勝手にはじけ）
+	sendto(sendSock, (char*)&data, sizeof(data), 0, (sockaddr*)&sendAdd, sizeof(sendAdd));
+}
 //=============================================================================
 //	ai用位置セット＆送信処理
 //=============================================================================
@@ -307,6 +318,11 @@ int main(void)
 	//-------------------------------------------------
 
 	initUserInfo();
+
+
+	timer = 0;
+
+
 	UINT threadID = 0;
 
 	HANDLE ai = 0;
@@ -700,6 +716,14 @@ unsigned __stdcall aiUpdate(void *p)
 			}
 			
 			PrevTime = CurrentTime;
+
+			timer++;
+
+			if (timer == 60)
+			{
+				set
+				timer = 0;
+			}
 		}
 	}
 }
