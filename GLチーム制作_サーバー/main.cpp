@@ -978,9 +978,9 @@ void PushBackBattleArea(void)
 		VECTOR3	vectoruserInfoToCenter = Ground->Pos() - infoPlayer.pos;
 		vectoruserInfoToCenter.y = 0.0f;
 		float	distanceFromCenter = vectoruserInfoToCenter.x * vectoruserInfoToCenter.x + vectoruserInfoToCenter.y * vectoruserInfoToCenter.y + vectoruserInfoToCenter.z * vectoruserInfoToCenter.z;
-		if (distanceFromCenter > RADIUS_AREA_BATTLE * RADIUS_AREA_BATTLE)
+		if (distanceFromCenter > (RADIUS_AREA_BATTLE - RADIUS_PUSH_CHARACTER) * (RADIUS_AREA_BATTLE - RADIUS_PUSH_CHARACTER))
 		{
-			float	distancePushBack = sqrtf(distanceFromCenter) - RADIUS_AREA_BATTLE;
+			float	distancePushBack = sqrtf(distanceFromCenter) - (RADIUS_AREA_BATTLE - RADIUS_PUSH_CHARACTER);
 			vectoruserInfoToCenter.Normalize();
 			infoPlayer.pos += vectoruserInfoToCenter * distancePushBack;
 		}
