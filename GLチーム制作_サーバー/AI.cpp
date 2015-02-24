@@ -34,7 +34,7 @@
 //------------------------------------------------------------------------------
 const float PLAYER_MOVE_SPEED (0.05f);			// 移動にかかる係数
 const float TURN_SPEED = 1.0f;		//回転速度
-const int PLAYER_RELOAD_TIME (300);			// リロードまでのフレーム
+const int PLAYER_RELOAD_TIME (400);			// リロードまでのフレーム
 const int UserMax = 6;//最大ユーザー数
 const double SURCH_MAX = 300.0f;	//フィールドのサイズの1/4
 const float GRAVITY = 0.06f;				//弾にかかる重力加速度

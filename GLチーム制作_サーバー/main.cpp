@@ -43,6 +43,8 @@ SOCKET sendSock;
 sockaddr_in sendAdd;
 bool gameStartFlag;
 
+bool threadEndFlag = false;
+
 int timer;
 int gameTime;
 HANDLE ai;
@@ -579,9 +581,8 @@ int main(void)
 					if (data.charNum == 0)
 					{
 						Reset();
-						AI::Finalize();
+						threadEndFlag = true;
 						CloseHandle(ai);
-						_endthreadex(0);
 						ai = 0;
 					}
 
@@ -703,6 +704,8 @@ unsigned __stdcall aiUpdate(void *p)
 	unsigned int FPSLastTime = 0;//DWORD dwFPSLastTime;
 	unsigned int FrameCount = 0; //DWORD dwFrameCount;
 
+	threadEndFlag = false;
+
 	timeBeginPeriod(1);				// ï™âî\Çê›íË
 
 	FPSLastTime =
@@ -770,7 +773,16 @@ unsigned __stdcall aiUpdate(void *p)
 				}*/
 			}
 		}
+
+		if (threadEndFlag)
+		{
+			AI::Finalize();
+			_endthreadex(0);
+			break;
+		}
 	}
+
+	return 0;
 }
 
 VECTOR3 GetRockPos(int index)
