@@ -319,6 +319,26 @@ int main(void)
 	sprintf_s(ip, inet_ntoa(in));
 	printf("%s:%s\n", hostName, ip);
 
+
+
+	FILE* fp;
+	char recvAddress[256] = { '\0' };
+	char sendAddress[256] = { '\0' };
+
+
+	//	受信アドレス取得
+	fp = fopen("recvAddress.txt", "r");
+	fscanf(fp, "%s", recvAddress);
+	fclose(fp);
+
+	//	送信アドレス取得
+	fp = fopen("sendAddress.txt", "r");
+	fscanf(fp, "%s", sendAddress);
+	fclose(fp);
+
+
+
+
 	//	送信時用変数群生成
 	//-------------------------------------------------
 	//	ソケットの生成
@@ -327,7 +347,7 @@ int main(void)
 	//	送信先アドレス
 	sendAdd.sin_port = htons(2000);
 	sendAdd.sin_family = AF_INET;
-	sendAdd.sin_addr.s_addr = inet_addr("239.0.0.23");//マルチキャストアドレス
+	sendAdd.sin_addr.s_addr = inet_addr(sendAddress);//マルチキャストアドレス
 
 	int param = 1;
 	int ret = setsockopt(sendSock, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&param, sizeof(param));
@@ -347,9 +367,14 @@ int main(void)
 	recvAdd.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	int recvAddLength = sizeof(recvAdd);
 
-	setsockopt(recvSock, SOL_SOCKET, SO_BROADCAST, (char *)&param, sizeof(param));
-
 	myBind(&recvSock, &recvAdd);
+
+	ip_mreq mreq;
+	mreq.imr_multiaddr.S_un.S_addr = inet_addr(recvAddress);
+	mreq.imr_interface.S_un.S_addr = INADDR_ANY;
+	ret = setsockopt(recvSock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq, sizeof(mreq));
+	if (ret != 0)
+		ret = WSAGetLastError();
 	//-------------------------------------------------
 
 	initUserInfo();
