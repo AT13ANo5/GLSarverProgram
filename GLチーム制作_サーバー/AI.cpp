@@ -242,7 +242,6 @@ void AI::Update(void)
 			TargetId = -1;
 		}
 	}
-	printf("ID:%d,%d\n",ID,TargetId);
 	UserInfo.pos += Movement;
 
 	MazzleRevision();
