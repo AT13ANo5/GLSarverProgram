@@ -151,7 +151,7 @@ void AI::Initialize(int _charNum)
 {
 	//srand((unsigned)time(nullptr));
 	Field = CMeshGround::Create(VECTOR3(0.0f,0.0f,0.0f),VECTOR2(FIELD_PANEL_SIZE,FIELD_PANEL_SIZE),VECTOR2(0,0),1.5f);
-	for (int cnt = _charNum;cnt < UserMax;cnt++)
+	for (int cnt = 0;cnt < UserMax;cnt++)
 	{
 		AI* ai = new AI;
 		ai->ID = cnt;
@@ -187,10 +187,6 @@ void AI::UpdateAll(void)
 		ai->Update();
 		ai = ai->Next;
 	}
-
-	ai = Top;
-
-	
 }
 
 void AI::UpdateInfomation(void)
@@ -224,7 +220,12 @@ void AI::SendState(void)
 //------------------------------------------------------------------------------
 void AI::Update(void)
 {
-	if (UserInfo.entryFlag || UserInfo.deathFlag)
+	if (UserInfo.deathFlag)
+	{
+		UserInfo.cannon = false;
+		return ;
+	}
+	if (UserInfo.entryFlag)
 	{
 		return ;
 	}
@@ -241,7 +242,7 @@ void AI::Update(void)
 			TargetId = -1;
 		}
 	}
-
+	printf("ID:%d,%d\n",ID,TargetId);
 	UserInfo.pos += Movement;
 
 	MazzleRevision();
@@ -282,15 +283,6 @@ void AI::Update(void)
 	}
 
 	Movement *= 0.95f;
-	
-
-	_ReloadTimer++;
-
-	if (_ReloadTimer >= PLAYER_RELOAD_TIME)
-	{
-		LaunchFlag = true;
-		_ReloadTimer = 0;
-	}
 	
 	Shot();
 	
@@ -351,20 +343,25 @@ void AI::SurchTarget(void)
 //------------------------------------------------------------------------------
 void AI::Shot(void)
 {
-	if (TargetId == -1 || Distance > MAX_RANGE)
+	if (LaunchFlag == false)
 	{
-		BarrelRotX = 0;
-		return;
-	}
-
-	if (LaunchFlag == true)
-	{
-		LaunchFlag = false;
+		if (TargetId == -1 || Distance > MAX_RANGE)
+		{
+			BarrelRotX = 0;
+			return;
+		}
 		UserInfo.cannon = true;
+		LaunchFlag = true;
+		_ReloadTimer = 0;
 	}
 	else
 	{
+		_ReloadTimer++;
 		UserInfo.cannon = false;
+		if (_ReloadTimer >= PLAYER_RELOAD_TIME)
+		{
+			LaunchFlag = false;
+		}
 	}
 }
 //------------------------------------------------------------------------------
@@ -373,7 +370,7 @@ void AI::Shot(void)
 void AI::SetUserInfo(USER_INFO* info, int _charNum)
 {
 	AI* ai = Top;
-	int cnt = _charNum;
+	int cnt = 0;
 	while (ai)
 	{
 		ai->UserInfo = info[cnt];
