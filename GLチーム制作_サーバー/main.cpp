@@ -523,7 +523,6 @@ int main(void)
 
 					break;
 
-
 				case DATA_TYPE_SEND_DEATH:
 
 					userInfo[data.charNum].deathFlag = true;

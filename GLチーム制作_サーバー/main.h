@@ -50,7 +50,6 @@ typedef struct
 	float posX;
 	float posY;
 	float posZ;
-
 }DATA_POS;
 //----------------------------------------------------------------
 
